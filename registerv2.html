@@ -1,0 +1,73 @@
+<form id="uploadForm">
+  <input type="text" name="name" placeholder="Name" required><br>
+  <input type="text" name="institution" placeholder="Institution" required><br>
+  <input type="text" name="designation" placeholder="Designation" required><br>
+  <input type="text" name="department" placeholder="Department" required><br>
+  <input type="text" name="country" placeholder="Country" required><br>
+  <input type="email" name="email" placeholder="Email Address" required><br>
+  <input type="tel" name="phone" placeholder="Phone Number" required><br>
+  <input type="text" name="title" placeholder="Paper Title" required><br>
+  <textarea name="abstract" maxlength="300" placeholder="Abstract (max 300 words)" required></textarea><br>
+  <input type="text" name="keywords" placeholder="Keywords (comma-separated)" required><br>
+  <input type="text" name="track" placeholder="Area/Track of Submission" required><br>
+  <input type="text" name="corresponding" placeholder="Corresponding Author" required><br>
+  <input type="text" name="payment" placeholder="Payment Method" required><br>
+  <input type="date" name="date" placeholder="Date of Payment" required><br>
+  <input type="text" name="transaction" placeholder="Transaction Reference" required><br>
+  <input type="file" id="file" name="file" accept=".pdf,.doc,.docx" required><br><br>
+  <input type="submit" value="Submit">
+</form>
+
+<p id="response"></p>
+
+<script>
+  const uploadUrl = "https://script.google.com/macros/s/AKfycbwd-biqPhsKn8bIYCqqdDP60KYs7qdp_e4VIpcjbhmQnozP9PFXmPeKxozXS6X_pNttOw/exec";
+  const formUrl = "https://script.google.com/macros/s/AKfycbyrPwn7WuStwVMnriKCgu1lIrCMzSW5TFl642B9E1jXp6Oi5vM45IEMXQAwJ2wlE2yTVA/exec";
+
+  document.getElementById("uploadForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const form = e.target;
+    const file = document.getElementById("file").files[0];
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      // Step 1: Upload file
+      const uploadRes = await fetch(uploadUrl, { method: "POST", body: formData });
+      const fileUrl = await uploadRes.text();
+
+      // Step 2: Submit form data with file URL
+      const jsonData = {
+        name: form.name.value,
+        institution: form.institution.value,
+        designation: form.designation.value,
+        department: form.department.value,
+        country: form.country.value,
+        email: form.email.value,
+        phone: form.phone.value,
+        title: form.title.value,
+        abstract: form.abstract.value,
+        keywords: form.keywords.value,
+        track: form.track.value,
+        corresponding: form.corresponding.value,
+        payment: form.payment.value,
+        date: form.date.value,
+        transaction: form.transaction.value,
+        fileUrl: fileUrl
+      };
+
+      const submitRes = await fetch(formUrl, {
+        method: "POST",
+        body: JSON.stringify(jsonData),
+        headers: { "Content-Type": "application/json" }
+      });
+
+      const result = await submitRes.text();
+      document.getElementById("response").innerText = result;
+
+    } catch (error) {
+      document.getElementById("response").innerText = "❌ Error: " + error.message;
+    }
+  });
+</script>
